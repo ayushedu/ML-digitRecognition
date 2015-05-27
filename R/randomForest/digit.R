@@ -8,26 +8,22 @@ closeAllConnections();
 rm(list=ls())
 
 ## vars
-numTree = 50
-numRowsForModel = 22000
+numTrees = 25
+numRowsForModel = 10000
 
 ## load data
-train <- read.csv('../../data/train.csv')
-smallTrain = train[sample(1:nrow(train), size = numRowsForModel),]
-rm(train)
-labels = as.factor(smallTrain[[1]])
-smallTrain = smallTrain[,-1]
+print('Loading data...')
+data <- read.csv('../../data/train.csv')
+test <- read.csv('../../data/test.csv')
+#rows <- sample(1:nrow(data), numRowsForModel)
+labels = as.factor(data[,1])
+train = data[,-1]
 
-inMyTrain = sample(c(TRUE, FALSE), size = numRowsForModel, replace = TRUE)
-myTrain = smallTrain[inMyTrain,]
-myTest = smallTrain[!inMyTrain,]
-labelsMyTrain = labels[inMyTrain]
-labelsMyTest = labels[!inMyTrain]
-
-## train model
+## run randomforest
+print('Running RandomForest...')
 library(randomForest)
-set.seed(0)
-rf <- randomForest(myTrain, labelsMyTrain, ntree = numTree, xtest = myTest, proximity = TRUE)
-predictions <- levels(labels)[rf$test$predicted]
-predictionIsCorrect = labelsMyTest == predictions
-cat(sprintf("Proportion correct in my test set: %f\n", mean(predictionIsCorrect)))
+rf <- randomForest(train, labels, ntree=numTrees, xtest=test)
+predictions <- data.frame(Label=levels(labels)[rf$test$predicted])
+head(predictions)
+
+write.csv(predictions, 'rf_benchmark.csv', row.names=FALSE)
