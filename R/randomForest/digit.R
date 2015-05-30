@@ -8,7 +8,7 @@ closeAllConnections();
 rm(list=ls())
 
 ## vars
-numTrees = 25
+numTrees = 500
 
 ## load data
 print('Loading data...')
@@ -23,7 +23,7 @@ trainTestLabel = as.factor(trainTest[,1])
 train = train[,-1]
 trainTest = trainTest[,-1]
 
-test <- read.csv('../../data/test.csv')
+
 # rows <- sample(1:nrow(data), numRowsForModel)
 
 # train = data[,-1]
@@ -31,12 +31,14 @@ test <- read.csv('../../data/test.csv')
 ## run randomforest
 print('Running RandomForest...')
 library(randomForest)
-rf <- randomForest(train, trainLabel, ntree=numTrees, xtest=trainTest, ytest = trainTestLabel, keep.forest = T)
+rf <- randomForest(train, trainLabel, ntree=numTrees, xtest=trainTest, ytest = trainTestLabel, 
+                   keep.forest = T)
 predictions <- levels(trainLabel)[rf$test$predicted]
 predictionIsCorrect = trainTestLabel == predictions
 print(paste('proportion correc', mean(predictionIsCorrect)))
 # head(predictions)
 
+test <- read.csv('../../data/test.csv')
 predicted <- predict(rf, newdata = test, OOB=T, type="response")
 predictions <- data.frame(ImageId=1:nrow(test),Label=levels(trainLabel)[predicted])
 write.csv(predictions, 'rf_benchmark.csv', row.names=FALSE, quote=FALSE)
